@@ -45,7 +45,7 @@ class EvaluateAtZeroOperator:
         x=sp.Symbol('x')
         return expression.subs(x,0)
 
-class IdentitySubstractOperator:
+class IdentitySubtractOperator:
     #Restar la misma funcion a si misma f(x)-f(x=)=0
     def apply(self, expression):
         return expression-expression
