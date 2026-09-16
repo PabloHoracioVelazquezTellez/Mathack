@@ -14,7 +14,26 @@ class Renderer:
         self.font_enemy = pygame.font.SysFont("Consolas", 18, bold=True)
         self.font_hud = pygame.font.SysFont("Consolas", 16, bold=True)
         self.font_title = pygame.font.SysFont("Consolas", 22, bold=True)
+        self.floating_texts = []
+        self.font_error = pygame.font.SysFont("Consolas", 15, bold=True)
 
+    def add_floating_error(self, text, screen_x, screen_y):
+        self.floating_texts.append(FloatingText(text, screen_x, screen_y))
+
+    def update_and_draw_floating_texts(self):
+        for ft in self.floating_texts[:]:
+            ft.update()
+            if ft.lifetime <= 0:
+                self.floating_texts.remove(ft)
+            else:
+                # Renderizado con fondo oscuro
+                surf = self.font_error.render(ft.text, True, ft.color)
+                rect = surf.get_rect(center=(int(ft.x), int(ft.y)))
+                bg_rect = rect.inflate(10, 6)
+                pygame.draw.rect(self.screen, (15, 15, 25), bg_rect, border_radius=4)
+                pygame.draw.rect(self.screen, (255, 85, 85), bg_rect, width=1, border_radius=4)
+                self.screen.blit(surf, rect)
+                
     def clear(self):
         self.screen.fill((15, 15, 22)) # Fondo oscuro espacial
 
@@ -121,3 +140,16 @@ class Renderer:
             target_info = f"OBJETIVO: f(x) = {selected_enemy.raw_expression_str} | COMPLEJIDAD: {selected_enemy.health}/{selected_enemy.max_health}"
             info_surf = self.font_hud.render(target_info, True, (255, 200, 0))
             self.screen.blit(info_surf, (self.width - info_surf.get_width() - 30, self.height - 38))
+
+class FloatingText:
+    def __init__(self, text, x, y, color=(255, 85, 85)):
+        self.text = text
+        self.x = x
+        self.y = y
+        self.color = color
+        self.lifetime = 110  # ~1.8 segundos a 60 FPS
+        
+    def update(self):
+        self.y -= 0.6  # Sube lentamente
+        self.lifetime -= 1
+

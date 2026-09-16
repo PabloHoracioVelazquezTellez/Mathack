@@ -1,5 +1,5 @@
 import pygame
-
+from data.data_loader import DataLoader
 class Button:
     def __init__(self, x, y, width, height, text, font, bg_color=(30, 35, 50), hover_color=(50, 60, 90), text_color=(0, 220, 255)):
         self.rect = pygame.Rect(x, y, width, height)
@@ -9,7 +9,7 @@ class Button:
         self.hover_color = hover_color
         self.text_color = text_color
         self.is_hovered = False
-
+        
     def draw(self, surface):
         color = self.hover_color if self.is_hovered else self.bg_color
         pygame.draw.rect(surface, color, self.rect, border_radius=8)
@@ -53,53 +53,9 @@ class UIMenuManager:
         self.selected_function_index = 0
 
         # Datos para la Bitácora de Funciones
-        self.function_database = [
-            {
-                "name": "f(x) = k (Constante)",
-                "linealidad": "Lineal (Grado 0)",
-                "continuidad": "Continua en todo R",
-                "inyectividad": "No Inyectiva",
-                "paridad": "Par: f(-x) = f(x)",
-                "complejidad": "Baja (1)",
-                "debilidad": "[C] Restar constante | [D] Derivar (pasa a 0)"
-            },
-            {
-                "name": "f(x) = ax + b (Polinomio Grado 1)",
-                "linealidad": "Lineal (Grado 1)",
-                "continuidad": "Continua en todo R",
-                "inyectividad": "Inyectiva",
-                "paridad": "Impar si b=0",
-                "complejidad": "Baja-Media (2)",
-                "debilidad": "[D] Derivar (pasa a constante) -> [D]"
-            },
-            {
-                "name": "f(x) = x^n (Polinomica General)",
-                "linealidad": "No lineal (Grado n)",
-                "continuidad": "Continua en todo R",
-                "inyectividad": "Inyectiva (n impar) / No (n par)",
-                "paridad": "Par (n par) / Impar (n impar)",
-                "complejidad": "Alta (n + 1)",
-                "debilidad": "[D] Derivar n veces consecutivas"
-            },
-            {
-                "name": "f(x) = 1/x (Racional Basica)",
-                "linealidad": "No lineal",
-                "continuidad": "Discontinua en x = 0 (Asintota)",
-                "inyectividad": "Inyectiva en R\\{0}",
-                "paridad": "Impar",
-                "complejidad": "Especial (3)",
-                "debilidad": "[X] Multiplicar *x (pasa a 1) -> [D]"
-            },
-            {
-                "name": "f(x) = sin(x) / cos(x) (Trigonométrica)",
-                "linealidad": "No lineal (Oscilatoria)",
-                "continuidad": "sin(x) Continua | cos(x) Discontinua en pi/2+k*pi",
-                "inyectividad": "No Inyectiva (Periodica)",
-                "paridad": "sin(x) Impar | cos(x) Par",
-                "complejidad": "Especial (3)",
-                "debilidad": "[E] Evaluar en x=0 (sin) | [D]->[E] (cos) | [R] Anular"
-            }
-        ]
+        self.data_loader = DataLoader()
+        # Carga la base de datos completa desde el JSON
+        self.function_database = self.data_loader.get_all_functions()
 
     def draw_main_menu(self, surface, mouse_pos):
         surface.fill((12, 14, 22))

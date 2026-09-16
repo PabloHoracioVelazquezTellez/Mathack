@@ -1,51 +1,53 @@
 import random
-import math 
+import math
 from core.enemy import FunctionEnemy
+from data.data_loader import DataLoader
 
 class WaveManager:
-    def __init__(self,spawn_radius=12.0):
-        self.spawn_radius=spawn_radius
-        self.current_wave=1
-        self.enemies_spawned_in_wave=0
-        self.enemies_per_wave=4
-        self.spawn_timer=0
-        self.spawn_cooldown=180
-        self.wave_in_progress=True
+    def __init__(self, coordinate_system):
+        self.plane = coordinate_system
+        self.data_loader = DataLoader() # Carga el JSON dinámicamente
+        self.current_wave = 1
+        self.enemies_in_wave = []
+        self.spawn_timer = 0
+        self.spawn_delay = 180  # Frames entre spawns (~3 segundos a 60 FPS)
+        self.wave_active = False
 
-        self.pool_wave_1=["2","3","x","x+1"]
-        self.pool_wave_2=["x**2","x**2 -1","2*x +3","1/x"]
-        self.pool_wave_3=["x**3","1/(x**2)","sin(x)","exp(x)"]
+    def start_next_wave(self):
+        """Prepara los enemigos de la oleada consultando el JSON"""
+        # Obtiene expresiones disponibles para el nivel de oleada actual
+        pool = self.data_loader.get_functions_for_wave(self.current_wave)
+        
+        # Cantidad de enemigos por oleada
+        enemy_count = 3 + self.current_wave * 2
+        
+        self.enemies_in_wave = [random.choice(pool) for _ in range(enemy_count)]
+        self.wave_active = True
+        self.spawn_timer = 0
 
+    def update(self, active_enemies_list):
+        if not self.wave_active:
+            return
 
-    def _get_random_spawn_pos(self):
-        angle=random.uniform(0,2*math.pi)
-        x=self.spawn_radius*math.cos(angle)
-        y=self.spawn_radius*math.sin(angle)
-        return x,y
+        self.spawn_timer += 1
+        
+        if self.spawn_timer >= self.spawn_delay and self.enemies_in_wave:
+            expr = self.enemies_in_wave.pop(0)
+            new_enemy = self._create_enemy_at_border(expr)
+            active_enemies_list.append(new_enemy)
+            self.spawn_timer = 0
 
-    def _select_expression(self):
-        if self.current_wave==1:
-            return random.choice(self.pool_wave_1)
-        elif self.current_wave==2:
-            return random.choice(self.pool_wave_2)
-        else:
-            pool=self.pool_wave_2+self.pool_wave_3
-            return random.choice(pool)
+        if not self.enemies_in_wave and len(active_enemies_list) == 0:
+            self.wave_active = False
+            self.current_wave += 1
 
-    def update(self,active_enemies):
-        self.spawn_timer +=1
-        if self.enemies_spawned_in_wave<self.enemies_per_wave:
-            if self.spawn_timer>=self.spawn_cooldown:
-                self.spawn_timer=0
-                expr=self._select_expression()
-                x,y=self._get_random_spawn_pos()
-                speed=0.008 +(self.current_wave*0.002)
-                self.enemies_spawned_in_wave+=1
-                return FunctionEnemy(expr,pos_x=x,pos_y=y,speed=speed)
-        elif len(active_enemies)==0:
-            self.current_wave +=1
-            self.enemies_spawned_in_wave=0
-            self.enemies_per_wave +=2
-            self.spawn_cooldown=max(60,self.spawn_cooldown -15)
-            self.spawn_timer=0
-        return None
+    def _create_enemy_at_border(self, expression_str):
+        angle = random.uniform(0, 2 * math.pi)
+        distance = 12.0
+        
+        pos_x = distance * math.cos(angle)
+        pos_y = distance * math.sin(angle)
+        
+        speed = 0.008 + (self.current_wave * 0.002)
+        
+        return FunctionEnemy(expression_str, pos_x=pos_x, pos_y=pos_y, speed=speed)

@@ -49,6 +49,8 @@ def main():
                         wave_manager = WaveManager(plane)
                         enemies = []
                         player_lives = 3
+                        selected_enemy_index = 0
+                        renderer.floating_texts.clear()
                         wave_manager.start_next_wave()
 
                     elif ui_menu.btn_instructions.is_clicked(mouse_pos, event.type):
@@ -69,6 +71,7 @@ def main():
 
             # ---------------- GESTIÓN DE EVENTOS DENTRO DEL JUEGO ----------------
             elif current_state == STATE_GAME:
+                # Selección de objetivo por clic
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mx, my = mouse_pos
                     math_x, math_y = plane.from_screen(mx, my)
@@ -77,22 +80,32 @@ def main():
                             selected_enemy_index = idx
                             break
 
+                # Selección y aplicación de operadores por teclado
                 elif event.type == pygame.KEYDOWN and enemies:
                     selected_enemy_index = min(selected_enemy_index, len(enemies) - 1)
                     target = enemies[selected_enemy_index]
                     
+                    operator = None
                     if event.key == pygame.K_d:
-                        target.apply_operator(DerivativeOperator(order=1))
+                        operator = DerivativeOperator(order=1)
                     elif event.key == pygame.K_x:
-                        target.apply_operator(MultiplyByXOperator())
+                        operator = MultiplyByXOperator()
                     elif event.key == pygame.K_c:
-                        target.apply_operator(SubtractConstantOperator(1))
+                        operator = SubtractConstantOperator(1)
                     elif event.key == pygame.K_e:
-                        target.apply_operator(EvaluateAtZeroOperator())
+                        operator = EvaluateAtZeroOperator()
                     elif event.key == pygame.K_r:
-                        target.apply_operator(IdentitySubtractOperator())
+                        operator = IdentitySubtractOperator()
 
-        # ---------------- RENDERIZADO SEGÚN EL ESTADO ----------------
+                    if operator:
+                        success, error_msg = target.apply_operator(operator, data_loader=ui_menu.data_loader)
+                        
+                        # Si viola un teorema o falla, se genera el texto flotante animado sobre el enemigo
+                        if not success and error_msg:
+                            sx, sy = plane.to_screen(target.pos_x, target.pos_y)
+                            renderer.add_floating_error(error_msg, sx, sy - 40)
+
+        # ---------------- RENDERIZADO Y LÓGICA SEGÚN EL ESTADO ----------------
         if current_state == STATE_MENU:
             ui_menu.draw_main_menu(renderer.screen, mouse_pos)
             
@@ -103,6 +116,7 @@ def main():
             ui_menu.draw_encyclopedia(renderer.screen, mouse_pos)
             
         elif current_state == STATE_GAME:
+            # 1. Actualización de oleadas y enemigos
             wave_manager.update(enemies)
             if not wave_manager.wave_active and len(enemies) == 0:
                 wave_manager.start_next_wave()
@@ -111,15 +125,18 @@ def main():
                 if enemy.move_towards_origin():
                     player_lives -= 1
 
+            # Filtrar enemigos destruidos o que colisionaron
             enemies = [e for e in enemies if e.alive]
             if enemies and selected_enemy_index >= len(enemies):
                 selected_enemy_index = len(enemies) - 1
 
             selected_target = enemies[selected_enemy_index] if enemies else None
 
+            # Condición de Game Over
             if player_lives <= 0:
-                current_state = STATE_MENU # Volver al menú tras perder
+                current_state = STATE_MENU  # Retorna al menú principal al perder
 
+            # 2. Renderizado del tablero y entidades
             renderer.clear()
             renderer.draw_axes(plane)
             renderer.draw_player(plane)
@@ -131,7 +148,9 @@ def main():
                 renderer.draw_function(segments, plane, color=color, is_selected=is_sel)
                 renderer.draw_enemy_ui(enemy, plane, is_selected=is_sel)
 
+            # 3. Renderizado del HUD y textos flotantes de error/easter egg
             renderer.draw_hud(selected_target)
+            renderer.update_and_draw_floating_texts()
 
         renderer.update()
         renderer.tick(60)

@@ -1,0 +1,42 @@
+{
+  "NON_DIFFERENTIABLE": [
+    { "msg": "¡ρablotz1504: no estas lo suficientemente ebrio para hacer eso ,':/", "weight": 5 },
+    { "msg": "¡Leibniz está llorando! Teorema de Fermat: la derivada no existe en puntos angulosos.", "weight": 19 },
+    { "msg": "Violación del Teorema de Weierstrass: Falta de suavidad local en la esquina.", "weight": 19 },
+    { "msg": "Error de Continuidad: La derivada lateral izquierda no coincide con la derecha.", "weight": 19 },
+    { "msg": "Criterio de Cuspide: Pendiente vertical infinita detectada.", "weight": 19 },
+    { "msg": "Cauchy rechaza tu solicitud: |x| no posee tangente única en el origen.", "weight": 19 }
+  ],
+  "ZERO_DERIVATIVE": [
+    { "msg": "¡ρablotz1504: no estas lo suficientemente ebrio para hacer eso ,':/", "weight": 5 },
+    { "msg": "Teorema de la Derivada Nula: d/dx(k) = 0. ¡Usa la tecla [C] o [E]!", "weight": 19 },
+    { "msg": "Axioma de Constantes: La tasa de cambio instantánea es cero. No desperdicies turnos.", "weight": 19 },
+    { "msg": "Euler te observa: Intentaste medir el cambio de lo que no cambia.", "weight": 19 },
+    { "msg": "Regla de la Potencia: x^0 es constante, derivarla no reduce su grado.", "weight": 19 },
+    { "msg": "Lagrange suspira: La pendiente de una recta horizontal siempre es nula.", "weight": 19 }
+  ],
+  "DIVISION_BY_ZERO": [
+    { "msg": "¡ρablotz1504: no estas lo suficientemente ebrio para hacer eso ,':/", "weight": 5 },
+    { "msg": "¡BOOM! Teorema de Discontinuidad Esencial: Dividir entre cero tiende a infinito.", "weight": 19 },
+    { "msg": "Singularidad detectada: x=0 no pertenece al dominio de la función.", "weight": 19 },
+    { "msg": "La Regla de L'Hôpital colapsó: Indeterminación sin solución en el límite.", "weight": 19 },
+    { "msg": "Axioma de los Reales: La división por cero no está definida en la estructura de campo.", "weight": 19 },
+    { "msg": "Asíntota Vertical Infranqueable: El fantasma de Dirichlet bloqueó la evaluación.", "weight": 19 }
+  ],
+  "INVALID_IDENTITY": [
+    { "msg": "¡ρablotz1504: no estas lo suficientemente ebrio para hacer eso ,':/", "weight": 5 },
+    { "msg": "Axioma de Identidad: No puedes anular f(x)-f(x) sin simplificar términos primero.", "weight": 19 },
+    { "msg": "Teorema de Existencia: La resta identidad está bloqueada para esta forma elemental.", "weight": 19 },
+    { "msg": "Gauss prohíbe el uso de la fuerza bruta: Simplifica mediante derivadas primero.", "weight": 19 },
+    { "msg": "Ley de Clausura: Operador R retenido para funciones de mayor complejidad.", "weight": 19 },
+    { "msg": "Principia Mathematica: Violación de equivalencia algebraica básica.", "weight": 19 }
+  ],
+  "CYCLIC_TRIGONOMETRIC": [
+    { "msg": "¡ρablotz1504: no estas lo suficientemente ebrio para hacer eso ,':/", "weight": 5 },
+    { "msg": "Bucle Infinito de Fourier: Derivar sin(x) solo te llevará a cos(x). ¡Usa [E]!", "weight": 19 },
+    { "msg": "Identidad de Euler: Las funciones periódicas no mueren derivando. ¡Evalúa en x=0!", "weight": 19 },
+    { "msg": "Teorema de la Oscilación: Grado infinito de diferenciabilidad. Cambia de estrategia.", "weight": 19 },
+    { "msg": "Propiedad de Periodicidad: f(x+2π) = f(x). La derivada nunca llegará a cero.", "weight": 19 },
+    { "msg": "Laplace advierte: Entraste en una órbita armónica infinita.", "weight": 19 }
+  ]
+}
