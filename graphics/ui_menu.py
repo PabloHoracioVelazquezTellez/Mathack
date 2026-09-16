@@ -189,3 +189,33 @@ class UIMenuManager:
             if f_rect.collidepoint(mouse_pos):
                 self.selected_function_index = idx
                 break
+
+    def draw_game_over(self, surface, wave_reached):
+        """pantalla de GAME OVER y opcion de reinicio"""
+        overlay=pygame.Surface((self.width,self.height), pygame.SRCALPHA)
+        overlay.fill((10,10,18,220))
+        surface.blit(overlay,(0,0))
+
+
+        panel_rect=pygame.Rect(self.width//2-300,self.height//2-160,600,320)
+        pygame.draw.rect(surface,(22,25,38),panel_rect,border_radius=12)
+        pygame.draw.rect(surface,(255,60,80),panel_rect,width=2,border_radius=12)
+
+
+        title_surf=self.font_title.render("G A M E      O V E R",True,(255,60,80))
+        sub_surf=self.font_subtitle.render("Las funciones han colapsado el origen (0,0)", True,(180,190,210))
+        wave_surf=self.font_btn.render(f"Sobreviviste hasta la Oleada: {wave_reached}",True,(255,200,0))
+
+
+        surface.blit(title_surf,title_surf.get_rect(center=(self.width//2,panel_rect.y+60)))
+        surface.blit(sub_surf,sub_surf.get_rect(center=(self.width//2,panel_rect.y+110)))
+        surface.blit(wave_surf,wave_surf.get_rect(center=(self.width//2,panel_rect.y+165)))
+
+
+        opt_enter=self.font_text.render("Presiona [ ENTER ] para Reiniciar la Partida",True,(0,220,255))
+        opt_esc=self.font_text.render("Presiona [ ESC ] para Volver al Mu=enu Principal",True,(140,150,170))
+
+
+
+        surface.blit(opt_enter,opt_enter.get_rect(center=(self.width//2,panel_rect.y+225)))
+        surface.blit(opt_esc,opt_esc.get_rect(center=(self.width//2,panel_rect.y+265)))

@@ -22,6 +22,7 @@ def main():
     STATE_GAME = 1
     STATE_INSTRUCTIONS = 2
     STATE_ENCYCLOPEDIA = 3
+    STATE_GAME_OVER = 4
     current_state = STATE_MENU
 
     wave_manager = None
@@ -38,7 +39,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 
-            # ---------------- GESTIÓN DE EVENTOS EN MENÚ PRINCIPAL ----------------
+            # ---------------- GESTIÓN EN MENÚ PRINCIPAL ----------------
             if current_state == STATE_MENU:
                 if ui_menu.show_objective_popup:
                     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -62,16 +63,30 @@ def main():
                     elif ui_menu.btn_encyclopedia.is_clicked(mouse_pos, event.type):
                         current_state = STATE_ENCYCLOPEDIA
 
-            # ---------------- GESTIÓN DE EVENTOS EN NAVEGACIÓN ----------------
+            # ---------------- GESTIÓN EN NAVEGACIÓN ----------------
             elif current_state in (STATE_INSTRUCTIONS, STATE_ENCYCLOPEDIA):
                 if ui_menu.btn_back.is_clicked(mouse_pos, event.type):
                     current_state = STATE_MENU
                 elif current_state == STATE_ENCYCLOPEDIA and event.type == pygame.MOUSEBUTTONDOWN:
                     ui_menu.handle_encyclopedia_click(mouse_pos)
 
-            # ---------------- GESTIÓN DE EVENTOS DENTRO DEL JUEGO ----------------
+            # ---------------- GESTIÓN EN GAME OVER ----------------
+            elif current_state == STATE_GAME_OVER:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:  # Tecla ENTER para Reiniciar
+                        current_state = STATE_GAME
+                        wave_manager = WaveManager(plane)
+                        enemies = []
+                        player_lives = 3
+                        selected_enemy_index = 0
+                        renderer.floating_texts.clear()
+                        wave_manager.start_next_wave()
+
+                    elif event.key == pygame.K_ESCAPE:  # Tecla ESC para ir al Menú
+                        current_state = STATE_MENU
+
+            # ---------------- GESTIÓN DENTRO DEL JUEGO ----------------
             elif current_state == STATE_GAME:
-                # Selección de objetivo por clic
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mx, my = mouse_pos
                     math_x, math_y = plane.from_screen(mx, my)
@@ -80,7 +95,6 @@ def main():
                             selected_enemy_index = idx
                             break
 
-                # Selección y aplicación de operadores por teclado
                 elif event.type == pygame.KEYDOWN and enemies:
                     selected_enemy_index = min(selected_enemy_index, len(enemies) - 1)
                     target = enemies[selected_enemy_index]
@@ -99,8 +113,6 @@ def main():
 
                     if operator:
                         success, error_msg = target.apply_operator(operator, data_loader=ui_menu.data_loader)
-                        
-                        # Si viola un teorema o falla, se genera el texto flotante animado sobre el enemigo
                         if not success and error_msg:
                             sx, sy = plane.to_screen(target.pos_x, target.pos_y)
                             renderer.add_floating_error(error_msg, sx, sy - 40)
@@ -116,7 +128,6 @@ def main():
             ui_menu.draw_encyclopedia(renderer.screen, mouse_pos)
             
         elif current_state == STATE_GAME:
-            # 1. Actualización de oleadas y enemigos
             wave_manager.update(enemies)
             if not wave_manager.wave_active and len(enemies) == 0:
                 wave_manager.start_next_wave()
@@ -125,18 +136,16 @@ def main():
                 if enemy.move_towards_origin():
                     player_lives -= 1
 
-            # Filtrar enemigos destruidos o que colisionaron
             enemies = [e for e in enemies if e.alive]
             if enemies and selected_enemy_index >= len(enemies):
                 selected_enemy_index = len(enemies) - 1
 
             selected_target = enemies[selected_enemy_index] if enemies else None
 
-            # Condición de Game Over
+            # Transición a Game Over al quedarse sin vidas
             if player_lives <= 0:
-                current_state = STATE_MENU  # Retorna al menú principal al perder
+                current_state = STATE_GAME_OVER
 
-            # 2. Renderizado del tablero y entidades
             renderer.clear()
             renderer.draw_axes(plane)
             renderer.draw_player(plane)
@@ -148,9 +157,16 @@ def main():
                 renderer.draw_function(segments, plane, color=color, is_selected=is_sel)
                 renderer.draw_enemy_ui(enemy, plane, is_selected=is_sel)
 
-            # 3. Renderizado del HUD y textos flotantes de error/easter egg
             renderer.draw_hud(selected_target)
             renderer.update_and_draw_floating_texts()
+
+        elif current_state == STATE_GAME_OVER:
+            # Dibujar el juego congelado al fondo y desplegar el panel de Game Over por encima
+            renderer.clear()
+            renderer.draw_axes(plane)
+            renderer.draw_player(plane)
+            renderer.draw_hud(None)
+            ui_menu.draw_game_over(renderer.screen, wave_manager.current_wave if wave_manager else 1)
 
         renderer.update()
         renderer.tick(60)
