@@ -39,7 +39,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 
-            # ---------------- GESTIÓN EN MENÚ PRINCIPAL ----------------
+            # ---------------- GESTION EN MENU PRINCIPAL ----------------
             if current_state == STATE_MENU:
                 if ui_menu.show_objective_popup:
                     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -116,6 +116,18 @@ def main():
                         if not success and error_msg:
                             sx, sy = plane.to_screen(target.pos_x, target.pos_y)
                             renderer.add_floating_error(error_msg, sx, sy - 40)
+                    if operator:
+                        # Guardamos la posición en pantalla antes de procesar por si es destruido
+                        enemy_screen_x, enemy_screen_y = plane.to_screen(target.pos_x, target.pos_y)
+                        
+                        success, error_msg = target.apply_operator(operator, data_loader=ui_menu.data_loader)
+                        
+                        if success:
+                            # Generar ráfaga de partículas al transformar o destruir la función
+                            renderer.add_explosion(enemy_screen_x, enemy_screen_y, count=25 if not target.alive else 12)
+                        elif error_msg:
+                            sx, sy = plane.to_screen(target.pos_x, target.pos_y)
+                            renderer.add_floating_error(error_msg, sx, sy - 40)
 
         # ---------------- RENDERIZADO Y LÓGICA SEGÚN EL ESTADO ----------------
         if current_state == STATE_MENU:
@@ -159,6 +171,9 @@ def main():
 
             renderer.draw_hud(selected_target)
             renderer.update_and_draw_floating_texts()
+            renderer.draw_hud(selected_target)
+            renderer.update_and_draw_floating_texts()
+            renderer.update_and_draw_particles()
 
         elif current_state == STATE_GAME_OVER:
             # Dibujar el juego congelado al fondo y desplegar el panel de Game Over por encima

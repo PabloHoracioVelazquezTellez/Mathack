@@ -1,4 +1,5 @@
 import pygame
+from graphics.particles import ParticleSystem
 
 class Renderer:
     def __init__(self, width=1280, height=720):
@@ -7,6 +8,7 @@ class Renderer:
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode((width, height))
+        self.particle_system=ParticleSystem()
         pygame.display.set_caption("Mathack - Math Combat Engine")
         self.clock = pygame.time.Clock()
         
@@ -140,6 +142,14 @@ class Renderer:
             target_info = f"OBJETIVO: f(x) = {selected_enemy.raw_expression_str} | COMPLEJIDAD: {selected_enemy.health}/{selected_enemy.max_health}"
             info_surf = self.font_hud.render(target_info, True, (255, 200, 0))
             self.screen.blit(info_surf, (self.width - info_surf.get_width() - 30, self.height - 38))
+
+
+    def add_explosion(self, screen_x, screen_y, count=35):
+        """Gatilla una explosión visual en coordenadas de pantalla"""
+        self.particle_system.emit_explosion(screen_x, screen_y, count=count)
+
+    def update_and_draw_particles(self):
+        self.particle_system.update_and_draw(self.screen)
 
 class FloatingText:
     def __init__(self, text, x, y, color=(255, 85, 85)):
